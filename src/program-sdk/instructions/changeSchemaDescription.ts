@@ -6,15 +6,17 @@
  * @see https://github.com/codama-idl/codama
  */
 import {
+  addDecoderSizePrefix,
+  addEncoderSizePrefix,
   combineCodec,
-  getAddressDecoder,
-  getAddressEncoder,
-  getArrayDecoder,
-  getArrayEncoder,
   getStructDecoder,
   getStructEncoder,
+  getU32Decoder,
+  getU32Encoder,
   getU8Decoder,
   getU8Encoder,
+  getUtf8Decoder,
+  getUtf8Encoder,
   transformEncoder,
   type Address,
   type Codec,
@@ -29,42 +31,40 @@ import {
   type ReadonlySignerAccount,
   type TransactionSigner,
   type WritableAccount,
-  type WritableSignerAccount,
-} from "@solana/kit";
+} from '@solana/kit';
 
-import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
+import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS } from '../programs';
+import { getAccountMetaFactory, type ResolvedAccount } from '../shared';
 
-export const CHANGE_AUTHORIZED_SIGNERS_DISCRIMINATOR = 3;
+export const CHANGE_SCHEMA_DESCRIPTION_DISCRIMINATOR = 4;
 
-export function getChangeAuthorizedSignersDiscriminatorBytes() {
-  return getU8Encoder().encode(CHANGE_AUTHORIZED_SIGNERS_DISCRIMINATOR);
+export function getChangeSchemaDescriptionDiscriminatorBytes() {
+  return getU8Encoder().encode(CHANGE_SCHEMA_DESCRIPTION_DISCRIMINATOR);
 }
 
-export type ChangeAuthorizedSignersInstruction<
+export type ChangeSchemaDescriptionInstruction<
   TProgram extends string = typeof SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS,
-  TAccountPayer extends string | IAccountMeta<string> = string,
   TAccountAuthority extends string | IAccountMeta<string> = string,
   TAccountCredential extends string | IAccountMeta<string> = string,
+  TAccountSchema extends string | IAccountMeta<string> = string,
   TAccountSystemProgram extends
     | string
-    | IAccountMeta<string> = "11111111111111111111111111111111",
+    | IAccountMeta<string> = '11111111111111111111111111111111',
   TRemainingAccounts extends readonly IAccountMeta<string>[] = [],
 > = IInstruction<TProgram> &
   IInstructionWithData<Uint8Array> &
   IInstructionWithAccounts<
     [
-      TAccountPayer extends string
-        ? WritableSignerAccount<TAccountPayer> &
-            IAccountSignerMeta<TAccountPayer>
-        : TAccountPayer,
       TAccountAuthority extends string
         ? ReadonlySignerAccount<TAccountAuthority> &
             IAccountSignerMeta<TAccountAuthority>
         : TAccountAuthority,
       TAccountCredential extends string
-        ? WritableAccount<TAccountCredential>
+        ? ReadonlyAccount<TAccountCredential>
         : TAccountCredential,
+      TAccountSchema extends string
+        ? WritableAccount<TAccountSchema>
+        : TAccountSchema,
       TAccountSystemProgram extends string
         ? ReadonlyAccount<TAccountSystemProgram>
         : TAccountSystemProgram,
@@ -72,79 +72,80 @@ export type ChangeAuthorizedSignersInstruction<
     ]
   >;
 
-export type ChangeAuthorizedSignersInstructionData = {
+export type ChangeSchemaDescriptionInstructionData = {
   discriminator: number;
-  signers: Array<Address>;
+  description: string;
 };
 
-export type ChangeAuthorizedSignersInstructionDataArgs = {
-  signers: Array<Address>;
+export type ChangeSchemaDescriptionInstructionDataArgs = {
+  description: string;
 };
 
-export function getChangeAuthorizedSignersInstructionDataEncoder(): Encoder<ChangeAuthorizedSignersInstructionDataArgs> {
+export function getChangeSchemaDescriptionInstructionDataEncoder(): Encoder<ChangeSchemaDescriptionInstructionDataArgs> {
   return transformEncoder(
     getStructEncoder([
-      ["discriminator", getU8Encoder()],
-      ["signers", getArrayEncoder(getAddressEncoder())],
+      ['discriminator', getU8Encoder()],
+      ['description', addEncoderSizePrefix(getUtf8Encoder(), getU32Encoder())],
     ]),
-    (value) => ({
+    value => ({
       ...value,
-      discriminator: CHANGE_AUTHORIZED_SIGNERS_DISCRIMINATOR,
+      discriminator: CHANGE_SCHEMA_DESCRIPTION_DISCRIMINATOR,
     }),
   );
 }
 
-export function getChangeAuthorizedSignersInstructionDataDecoder(): Decoder<ChangeAuthorizedSignersInstructionData> {
+export function getChangeSchemaDescriptionInstructionDataDecoder(): Decoder<ChangeSchemaDescriptionInstructionData> {
   return getStructDecoder([
-    ["discriminator", getU8Decoder()],
-    ["signers", getArrayDecoder(getAddressDecoder())],
+    ['discriminator', getU8Decoder()],
+    ['description', addDecoderSizePrefix(getUtf8Decoder(), getU32Decoder())],
   ]);
 }
 
-export function getChangeAuthorizedSignersInstructionDataCodec(): Codec<
-  ChangeAuthorizedSignersInstructionDataArgs,
-  ChangeAuthorizedSignersInstructionData
+export function getChangeSchemaDescriptionInstructionDataCodec(): Codec<
+  ChangeSchemaDescriptionInstructionDataArgs,
+  ChangeSchemaDescriptionInstructionData
 > {
   return combineCodec(
-    getChangeAuthorizedSignersInstructionDataEncoder(),
-    getChangeAuthorizedSignersInstructionDataDecoder(),
+    getChangeSchemaDescriptionInstructionDataEncoder(),
+    getChangeSchemaDescriptionInstructionDataDecoder(),
   );
 }
 
-export type ChangeAuthorizedSignersInput<
-  TAccountPayer extends string = string,
+export type ChangeSchemaDescriptionInput<
   TAccountAuthority extends string = string,
   TAccountCredential extends string = string,
+  TAccountSchema extends string = string,
   TAccountSystemProgram extends string = string,
 > = {
-  payer: TransactionSigner<TAccountPayer>;
   authority: TransactionSigner<TAccountAuthority>;
   /** Credential the Schema is associated with */
   credential: Address<TAccountCredential>;
+  /** Credential the Schema is associated with */
+  schema: Address<TAccountSchema>;
   systemProgram?: Address<TAccountSystemProgram>;
-  signers: ChangeAuthorizedSignersInstructionDataArgs["signers"];
+  description: ChangeSchemaDescriptionInstructionDataArgs['description'];
 };
 
-export function getChangeAuthorizedSignersInstruction<
-  TAccountPayer extends string,
+export function getChangeSchemaDescriptionInstruction<
   TAccountAuthority extends string,
   TAccountCredential extends string,
+  TAccountSchema extends string,
   TAccountSystemProgram extends string,
   TProgramAddress extends
     Address = typeof SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS,
 >(
-  input: ChangeAuthorizedSignersInput<
-    TAccountPayer,
+  input: ChangeSchemaDescriptionInput<
     TAccountAuthority,
     TAccountCredential,
+    TAccountSchema,
     TAccountSystemProgram
   >,
   config?: { programAddress?: TProgramAddress },
-): ChangeAuthorizedSignersInstruction<
+): ChangeSchemaDescriptionInstruction<
   TProgramAddress,
-  TAccountPayer,
   TAccountAuthority,
   TAccountCredential,
+  TAccountSchema,
   TAccountSystemProgram
 > {
   // Program address.
@@ -153,9 +154,9 @@ export function getChangeAuthorizedSignersInstruction<
 
   // Original accounts.
   const originalAccounts = {
-    payer: { value: input.payer ?? null, isWritable: true },
     authority: { value: input.authority ?? null, isWritable: false },
-    credential: { value: input.credential ?? null, isWritable: true },
+    credential: { value: input.credential ?? null, isWritable: false },
+    schema: { value: input.schema ?? null, isWritable: true },
     systemProgram: { value: input.systemProgram ?? null, isWritable: false },
   };
   const accounts = originalAccounts as Record<
@@ -169,58 +170,59 @@ export function getChangeAuthorizedSignersInstruction<
   // Resolve default values.
   if (!accounts.systemProgram.value) {
     accounts.systemProgram.value =
-      "11111111111111111111111111111111" as Address<"11111111111111111111111111111111">;
+      '11111111111111111111111111111111' as Address<'11111111111111111111111111111111'>;
   }
 
-  const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
+  const getAccountMeta = getAccountMetaFactory(programAddress, 'programId');
   const instruction = {
     accounts: [
-      getAccountMeta(accounts.payer),
       getAccountMeta(accounts.authority),
       getAccountMeta(accounts.credential),
+      getAccountMeta(accounts.schema),
       getAccountMeta(accounts.systemProgram),
     ],
     programAddress,
-    data: getChangeAuthorizedSignersInstructionDataEncoder().encode(
-      args as ChangeAuthorizedSignersInstructionDataArgs,
+    data: getChangeSchemaDescriptionInstructionDataEncoder().encode(
+      args as ChangeSchemaDescriptionInstructionDataArgs,
     ),
-  } as ChangeAuthorizedSignersInstruction<
+  } as ChangeSchemaDescriptionInstruction<
     TProgramAddress,
-    TAccountPayer,
     TAccountAuthority,
     TAccountCredential,
+    TAccountSchema,
     TAccountSystemProgram
   >;
 
   return instruction;
 }
 
-export type ParsedChangeAuthorizedSignersInstruction<
+export type ParsedChangeSchemaDescriptionInstruction<
   TProgram extends string = typeof SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS,
   TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[],
 > = {
   programAddress: Address<TProgram>;
   accounts: {
-    payer: TAccountMetas[0];
-    authority: TAccountMetas[1];
+    authority: TAccountMetas[0];
     /** Credential the Schema is associated with */
-    credential: TAccountMetas[2];
+    credential: TAccountMetas[1];
+    /** Credential the Schema is associated with */
+    schema: TAccountMetas[2];
     systemProgram: TAccountMetas[3];
   };
-  data: ChangeAuthorizedSignersInstructionData;
+  data: ChangeSchemaDescriptionInstructionData;
 };
 
-export function parseChangeAuthorizedSignersInstruction<
+export function parseChangeSchemaDescriptionInstruction<
   TProgram extends string,
   TAccountMetas extends readonly IAccountMeta[],
 >(
   instruction: IInstruction<TProgram> &
     IInstructionWithAccounts<TAccountMetas> &
     IInstructionWithData<Uint8Array>,
-): ParsedChangeAuthorizedSignersInstruction<TProgram, TAccountMetas> {
+): ParsedChangeSchemaDescriptionInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 4) {
     // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new Error('Not enough accounts');
   }
   let accountIndex = 0;
   const getNextAccount = () => {
@@ -231,12 +233,12 @@ export function parseChangeAuthorizedSignersInstruction<
   return {
     programAddress: instruction.programAddress,
     accounts: {
-      payer: getNextAccount(),
       authority: getNextAccount(),
       credential: getNextAccount(),
+      schema: getNextAccount(),
       systemProgram: getNextAccount(),
     },
-    data: getChangeAuthorizedSignersInstructionDataDecoder().decode(
+    data: getChangeSchemaDescriptionInstructionDataDecoder().decode(
       instruction.data,
     ),
   };

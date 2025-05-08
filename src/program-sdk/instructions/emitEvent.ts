@@ -24,10 +24,10 @@ import {
   type ReadonlyAccount,
   type ReadonlySignerAccount,
   type TransactionSigner,
-} from "@solana/kit";
+} from '@solana/kit';
 
-import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
+import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS } from '../programs';
+import { getAccountMetaFactory, type ResolvedAccount } from '../shared';
 
 export const EMIT_EVENT_DISCRIMINATOR = 8;
 
@@ -61,13 +61,13 @@ export type EmitEventInstructionDataArgs = {};
 
 export function getEmitEventInstructionDataEncoder(): Encoder<EmitEventInstructionDataArgs> {
   return transformEncoder(
-    getStructEncoder([["discriminator", getU8Encoder()]]),
-    (value) => ({ ...value, discriminator: EMIT_EVENT_DISCRIMINATOR }),
+    getStructEncoder([['discriminator', getU8Encoder()]]),
+    value => ({ ...value, discriminator: EMIT_EVENT_DISCRIMINATOR }),
   );
 }
 
 export function getEmitEventInstructionDataDecoder(): Decoder<EmitEventInstructionData> {
-  return getStructDecoder([["discriminator", getU8Decoder()]]);
+  return getStructDecoder([['discriminator', getU8Decoder()]]);
 }
 
 export function getEmitEventInstructionDataCodec(): Codec<
@@ -118,7 +118,7 @@ export function getEmitEventInstruction<
     ResolvedAccount
   >;
 
-  const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
+  const getAccountMeta = getAccountMetaFactory(programAddress, 'programId');
   const instruction = {
     accounts: [
       getAccountMeta(accounts.eventAuthority),
@@ -157,7 +157,7 @@ export function parseEmitEventInstruction<
 ): ParsedEmitEventInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 2) {
     // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new Error('Not enough accounts');
   }
   let accountIndex = 0;
   const getNextAccount = () => {

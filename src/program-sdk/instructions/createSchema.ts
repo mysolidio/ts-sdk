@@ -9,10 +9,10 @@ import {
   addDecoderSizePrefix,
   addEncoderSizePrefix,
   combineCodec,
-  getAddressDecoder,
-  getAddressEncoder,
   getArrayDecoder,
   getArrayEncoder,
+  getBytesDecoder,
+  getBytesEncoder,
   getStructDecoder,
   getStructEncoder,
   getU32Decoder,
@@ -33,28 +33,30 @@ import {
   type IInstructionWithData,
   type ReadonlyAccount,
   type ReadonlySignerAccount,
+  type ReadonlyUint8Array,
   type TransactionSigner,
   type WritableAccount,
   type WritableSignerAccount,
-} from "@solana/kit";
+} from '@solana/kit';
 
-import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
+import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS } from '../programs';
+import { getAccountMetaFactory, type ResolvedAccount } from '../shared';
 
-export const CREATE_CREDENTIAL_DISCRIMINATOR = 0;
+export const CREATE_SCHEMA_DISCRIMINATOR = 1;
 
-export function getCreateCredentialDiscriminatorBytes() {
-  return getU8Encoder().encode(CREATE_CREDENTIAL_DISCRIMINATOR);
+export function getCreateSchemaDiscriminatorBytes() {
+  return getU8Encoder().encode(CREATE_SCHEMA_DISCRIMINATOR);
 }
 
-export type CreateCredentialInstruction<
+export type CreateSchemaInstruction<
   TProgram extends string = typeof SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS,
   TAccountPayer extends string | IAccountMeta<string> = string,
-  TAccountCredential extends string | IAccountMeta<string> = string,
   TAccountAuthority extends string | IAccountMeta<string> = string,
+  TAccountCredential extends string | IAccountMeta<string> = string,
+  TAccountSchema extends string | IAccountMeta<string> = string,
   TAccountSystemProgram extends
     | string
-    | IAccountMeta<string> = "11111111111111111111111111111111",
+    | IAccountMeta<string> = '11111111111111111111111111111111',
   TRemainingAccounts extends readonly IAccountMeta<string>[] = [],
 > = IInstruction<TProgram> &
   IInstructionWithData<Uint8Array> &
@@ -64,13 +66,16 @@ export type CreateCredentialInstruction<
         ? WritableSignerAccount<TAccountPayer> &
             IAccountSignerMeta<TAccountPayer>
         : TAccountPayer,
-      TAccountCredential extends string
-        ? WritableAccount<TAccountCredential>
-        : TAccountCredential,
       TAccountAuthority extends string
         ? ReadonlySignerAccount<TAccountAuthority> &
             IAccountSignerMeta<TAccountAuthority>
         : TAccountAuthority,
+      TAccountCredential extends string
+        ? ReadonlyAccount<TAccountCredential>
+        : TAccountCredential,
+      TAccountSchema extends string
+        ? WritableAccount<TAccountSchema>
+        : TAccountSchema,
       TAccountSystemProgram extends string
         ? ReadonlyAccount<TAccountSystemProgram>
         : TAccountSystemProgram,
@@ -78,80 +83,104 @@ export type CreateCredentialInstruction<
     ]
   >;
 
-export type CreateCredentialInstructionData = {
+export type CreateSchemaInstructionData = {
   discriminator: number;
   name: string;
-  signers: Array<Address>;
+  description: string;
+  layout: ReadonlyUint8Array;
+  fieldNames: Array<string>;
 };
 
-export type CreateCredentialInstructionDataArgs = {
+export type CreateSchemaInstructionDataArgs = {
   name: string;
-  signers: Array<Address>;
+  description: string;
+  layout: ReadonlyUint8Array;
+  fieldNames: Array<string>;
 };
 
-export function getCreateCredentialInstructionDataEncoder(): Encoder<CreateCredentialInstructionDataArgs> {
+export function getCreateSchemaInstructionDataEncoder(): Encoder<CreateSchemaInstructionDataArgs> {
   return transformEncoder(
     getStructEncoder([
-      ["discriminator", getU8Encoder()],
-      ["name", addEncoderSizePrefix(getUtf8Encoder(), getU32Encoder())],
-      ["signers", getArrayEncoder(getAddressEncoder())],
+      ['discriminator', getU8Encoder()],
+      ['name', addEncoderSizePrefix(getUtf8Encoder(), getU32Encoder())],
+      ['description', addEncoderSizePrefix(getUtf8Encoder(), getU32Encoder())],
+      ['layout', addEncoderSizePrefix(getBytesEncoder(), getU32Encoder())],
+      [
+        'fieldNames',
+        getArrayEncoder(
+          addEncoderSizePrefix(getUtf8Encoder(), getU32Encoder()),
+        ),
+      ],
     ]),
-    (value) => ({ ...value, discriminator: CREATE_CREDENTIAL_DISCRIMINATOR }),
+    value => ({ ...value, discriminator: CREATE_SCHEMA_DISCRIMINATOR }),
   );
 }
 
-export function getCreateCredentialInstructionDataDecoder(): Decoder<CreateCredentialInstructionData> {
+export function getCreateSchemaInstructionDataDecoder(): Decoder<CreateSchemaInstructionData> {
   return getStructDecoder([
-    ["discriminator", getU8Decoder()],
-    ["name", addDecoderSizePrefix(getUtf8Decoder(), getU32Decoder())],
-    ["signers", getArrayDecoder(getAddressDecoder())],
+    ['discriminator', getU8Decoder()],
+    ['name', addDecoderSizePrefix(getUtf8Decoder(), getU32Decoder())],
+    ['description', addDecoderSizePrefix(getUtf8Decoder(), getU32Decoder())],
+    ['layout', addDecoderSizePrefix(getBytesDecoder(), getU32Decoder())],
+    [
+      'fieldNames',
+      getArrayDecoder(addDecoderSizePrefix(getUtf8Decoder(), getU32Decoder())),
+    ],
   ]);
 }
 
-export function getCreateCredentialInstructionDataCodec(): Codec<
-  CreateCredentialInstructionDataArgs,
-  CreateCredentialInstructionData
+export function getCreateSchemaInstructionDataCodec(): Codec<
+  CreateSchemaInstructionDataArgs,
+  CreateSchemaInstructionData
 > {
   return combineCodec(
-    getCreateCredentialInstructionDataEncoder(),
-    getCreateCredentialInstructionDataDecoder(),
+    getCreateSchemaInstructionDataEncoder(),
+    getCreateSchemaInstructionDataDecoder(),
   );
 }
 
-export type CreateCredentialInput<
+export type CreateSchemaInput<
   TAccountPayer extends string = string,
-  TAccountCredential extends string = string,
   TAccountAuthority extends string = string,
+  TAccountCredential extends string = string,
+  TAccountSchema extends string = string,
   TAccountSystemProgram extends string = string,
 > = {
   payer: TransactionSigner<TAccountPayer>;
-  credential: Address<TAccountCredential>;
   authority: TransactionSigner<TAccountAuthority>;
+  /** Credential the Schema is associated with */
+  credential: Address<TAccountCredential>;
+  schema: Address<TAccountSchema>;
   systemProgram?: Address<TAccountSystemProgram>;
-  name: CreateCredentialInstructionDataArgs["name"];
-  signers: CreateCredentialInstructionDataArgs["signers"];
+  name: CreateSchemaInstructionDataArgs['name'];
+  description: CreateSchemaInstructionDataArgs['description'];
+  layout: CreateSchemaInstructionDataArgs['layout'];
+  fieldNames: CreateSchemaInstructionDataArgs['fieldNames'];
 };
 
-export function getCreateCredentialInstruction<
+export function getCreateSchemaInstruction<
   TAccountPayer extends string,
-  TAccountCredential extends string,
   TAccountAuthority extends string,
+  TAccountCredential extends string,
+  TAccountSchema extends string,
   TAccountSystemProgram extends string,
   TProgramAddress extends
     Address = typeof SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS,
 >(
-  input: CreateCredentialInput<
+  input: CreateSchemaInput<
     TAccountPayer,
-    TAccountCredential,
     TAccountAuthority,
+    TAccountCredential,
+    TAccountSchema,
     TAccountSystemProgram
   >,
   config?: { programAddress?: TProgramAddress },
-): CreateCredentialInstruction<
+): CreateSchemaInstruction<
   TProgramAddress,
   TAccountPayer,
-  TAccountCredential,
   TAccountAuthority,
+  TAccountCredential,
+  TAccountSchema,
   TAccountSystemProgram
 > {
   // Program address.
@@ -161,8 +190,9 @@ export function getCreateCredentialInstruction<
   // Original accounts.
   const originalAccounts = {
     payer: { value: input.payer ?? null, isWritable: true },
-    credential: { value: input.credential ?? null, isWritable: true },
     authority: { value: input.authority ?? null, isWritable: false },
+    credential: { value: input.credential ?? null, isWritable: false },
+    schema: { value: input.schema ?? null, isWritable: true },
     systemProgram: { value: input.systemProgram ?? null, isWritable: false },
   };
   const accounts = originalAccounts as Record<
@@ -176,57 +206,61 @@ export function getCreateCredentialInstruction<
   // Resolve default values.
   if (!accounts.systemProgram.value) {
     accounts.systemProgram.value =
-      "11111111111111111111111111111111" as Address<"11111111111111111111111111111111">;
+      '11111111111111111111111111111111' as Address<'11111111111111111111111111111111'>;
   }
 
-  const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
+  const getAccountMeta = getAccountMetaFactory(programAddress, 'programId');
   const instruction = {
     accounts: [
       getAccountMeta(accounts.payer),
-      getAccountMeta(accounts.credential),
       getAccountMeta(accounts.authority),
+      getAccountMeta(accounts.credential),
+      getAccountMeta(accounts.schema),
       getAccountMeta(accounts.systemProgram),
     ],
     programAddress,
-    data: getCreateCredentialInstructionDataEncoder().encode(
-      args as CreateCredentialInstructionDataArgs,
+    data: getCreateSchemaInstructionDataEncoder().encode(
+      args as CreateSchemaInstructionDataArgs,
     ),
-  } as CreateCredentialInstruction<
+  } as CreateSchemaInstruction<
     TProgramAddress,
     TAccountPayer,
-    TAccountCredential,
     TAccountAuthority,
+    TAccountCredential,
+    TAccountSchema,
     TAccountSystemProgram
   >;
 
   return instruction;
 }
 
-export type ParsedCreateCredentialInstruction<
+export type ParsedCreateSchemaInstruction<
   TProgram extends string = typeof SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS,
   TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[],
 > = {
   programAddress: Address<TProgram>;
   accounts: {
     payer: TAccountMetas[0];
-    credential: TAccountMetas[1];
-    authority: TAccountMetas[2];
-    systemProgram: TAccountMetas[3];
+    authority: TAccountMetas[1];
+    /** Credential the Schema is associated with */
+    credential: TAccountMetas[2];
+    schema: TAccountMetas[3];
+    systemProgram: TAccountMetas[4];
   };
-  data: CreateCredentialInstructionData;
+  data: CreateSchemaInstructionData;
 };
 
-export function parseCreateCredentialInstruction<
+export function parseCreateSchemaInstruction<
   TProgram extends string,
   TAccountMetas extends readonly IAccountMeta[],
 >(
   instruction: IInstruction<TProgram> &
     IInstructionWithAccounts<TAccountMetas> &
     IInstructionWithData<Uint8Array>,
-): ParsedCreateCredentialInstruction<TProgram, TAccountMetas> {
-  if (instruction.accounts.length < 4) {
+): ParsedCreateSchemaInstruction<TProgram, TAccountMetas> {
+  if (instruction.accounts.length < 5) {
     // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new Error('Not enough accounts');
   }
   let accountIndex = 0;
   const getNextAccount = () => {
@@ -238,10 +272,11 @@ export function parseCreateCredentialInstruction<
     programAddress: instruction.programAddress,
     accounts: {
       payer: getNextAccount(),
-      credential: getNextAccount(),
       authority: getNextAccount(),
+      credential: getNextAccount(),
+      schema: getNextAccount(),
       systemProgram: getNextAccount(),
     },
-    data: getCreateCredentialInstructionDataDecoder().decode(instruction.data),
+    data: getCreateSchemaInstructionDataDecoder().decode(instruction.data),
   };
 }

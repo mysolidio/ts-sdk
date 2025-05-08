@@ -37,7 +37,7 @@ import {
   type MaybeAccount,
   type MaybeEncodedAccount,
   type ReadonlyUint8Array,
-} from "@solana/kit";
+} from '@solana/kit';
 
 export type Schema = {
   discriminator: number;
@@ -54,27 +54,27 @@ export type SchemaArgs = Schema;
 
 export function getSchemaEncoder(): Encoder<SchemaArgs> {
   return getStructEncoder([
-    ["discriminator", getU8Encoder()],
-    ["credential", getAddressEncoder()],
-    ["name", addEncoderSizePrefix(getBytesEncoder(), getU32Encoder())],
-    ["description", addEncoderSizePrefix(getBytesEncoder(), getU32Encoder())],
-    ["layout", addEncoderSizePrefix(getBytesEncoder(), getU32Encoder())],
-    ["fieldNames", addEncoderSizePrefix(getBytesEncoder(), getU32Encoder())],
-    ["isPaused", getBooleanEncoder()],
-    ["version", getU8Encoder()],
+    ['discriminator', getU8Encoder()],
+    ['credential', getAddressEncoder()],
+    ['name', addEncoderSizePrefix(getBytesEncoder(), getU32Encoder())],
+    ['description', addEncoderSizePrefix(getBytesEncoder(), getU32Encoder())],
+    ['layout', addEncoderSizePrefix(getBytesEncoder(), getU32Encoder())],
+    ['fieldNames', addEncoderSizePrefix(getBytesEncoder(), getU32Encoder())],
+    ['isPaused', getBooleanEncoder()],
+    ['version', getU8Encoder()],
   ]);
 }
 
 export function getSchemaDecoder(): Decoder<Schema> {
   return getStructDecoder([
-    ["discriminator", getU8Decoder()],
-    ["credential", getAddressDecoder()],
-    ["name", addDecoderSizePrefix(getBytesDecoder(), getU32Decoder())],
-    ["description", addDecoderSizePrefix(getBytesDecoder(), getU32Decoder())],
-    ["layout", addDecoderSizePrefix(getBytesDecoder(), getU32Decoder())],
-    ["fieldNames", addDecoderSizePrefix(getBytesDecoder(), getU32Decoder())],
-    ["isPaused", getBooleanDecoder()],
-    ["version", getU8Decoder()],
+    ['discriminator', getU8Decoder()],
+    ['credential', getAddressDecoder()],
+    ['name', addDecoderSizePrefix(getBytesDecoder(), getU32Decoder())],
+    ['description', addDecoderSizePrefix(getBytesDecoder(), getU32Decoder())],
+    ['layout', addDecoderSizePrefix(getBytesDecoder(), getU32Decoder())],
+    ['fieldNames', addDecoderSizePrefix(getBytesDecoder(), getU32Decoder())],
+    ['isPaused', getBooleanDecoder()],
+    ['version', getU8Decoder()],
   ]);
 }
 
@@ -132,5 +132,5 @@ export async function fetchAllMaybeSchema(
   config?: FetchAccountsConfig,
 ): Promise<MaybeAccount<Schema>[]> {
   const maybeAccounts = await fetchEncodedAccounts(rpc, addresses, config);
-  return maybeAccounts.map((maybeAccount) => decodeSchema(maybeAccount));
+  return maybeAccounts.map(maybeAccount => decodeSchema(maybeAccount));
 }

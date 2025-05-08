@@ -27,10 +27,10 @@ import {
   type ReadonlySignerAccount,
   type TransactionSigner,
   type WritableAccount,
-} from "@solana/kit";
+} from '@solana/kit';
 
-import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
+import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS } from '../programs';
+import { getAccountMetaFactory, type ResolvedAccount } from '../shared';
 
 export const CHANGE_SCHEMA_STATUS_DISCRIMINATOR = 2;
 
@@ -72,10 +72,10 @@ export type ChangeSchemaStatusInstructionDataArgs = { isPaused: boolean };
 export function getChangeSchemaStatusInstructionDataEncoder(): Encoder<ChangeSchemaStatusInstructionDataArgs> {
   return transformEncoder(
     getStructEncoder([
-      ["discriminator", getU8Encoder()],
-      ["isPaused", getBooleanEncoder()],
+      ['discriminator', getU8Encoder()],
+      ['isPaused', getBooleanEncoder()],
     ]),
-    (value) => ({
+    value => ({
       ...value,
       discriminator: CHANGE_SCHEMA_STATUS_DISCRIMINATOR,
     }),
@@ -84,8 +84,8 @@ export function getChangeSchemaStatusInstructionDataEncoder(): Encoder<ChangeSch
 
 export function getChangeSchemaStatusInstructionDataDecoder(): Decoder<ChangeSchemaStatusInstructionData> {
   return getStructDecoder([
-    ["discriminator", getU8Decoder()],
-    ["isPaused", getBooleanDecoder()],
+    ['discriminator', getU8Decoder()],
+    ['isPaused', getBooleanDecoder()],
   ]);
 }
 
@@ -109,7 +109,7 @@ export type ChangeSchemaStatusInput<
   credential: Address<TAccountCredential>;
   /** Credential the Schema is associated with */
   schema: Address<TAccountSchema>;
-  isPaused: ChangeSchemaStatusInstructionDataArgs["isPaused"];
+  isPaused: ChangeSchemaStatusInstructionDataArgs['isPaused'];
 };
 
 export function getChangeSchemaStatusInstruction<
@@ -149,7 +149,7 @@ export function getChangeSchemaStatusInstruction<
   // Original args.
   const args = { ...input };
 
-  const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
+  const getAccountMeta = getAccountMetaFactory(programAddress, 'programId');
   const instruction = {
     accounts: [
       getAccountMeta(accounts.authority),
@@ -195,7 +195,7 @@ export function parseChangeSchemaStatusInstruction<
 ): ParsedChangeSchemaStatusInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 3) {
     // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new Error('Not enough accounts');
   }
   let accountIndex = 0;
   const getNextAccount = () => {

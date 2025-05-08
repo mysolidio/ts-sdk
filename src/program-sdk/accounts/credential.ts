@@ -37,7 +37,7 @@ import {
   type MaybeAccount,
   type MaybeEncodedAccount,
   type ReadonlyUint8Array,
-} from "@solana/kit";
+} from '@solana/kit';
 
 export type Credential = {
   discriminator: number;
@@ -50,19 +50,19 @@ export type CredentialArgs = Credential;
 
 export function getCredentialEncoder(): Encoder<CredentialArgs> {
   return getStructEncoder([
-    ["discriminator", getU8Encoder()],
-    ["authority", getAddressEncoder()],
-    ["name", addEncoderSizePrefix(getBytesEncoder(), getU32Encoder())],
-    ["authorizedSigners", getArrayEncoder(getAddressEncoder())],
+    ['discriminator', getU8Encoder()],
+    ['authority', getAddressEncoder()],
+    ['name', addEncoderSizePrefix(getBytesEncoder(), getU32Encoder())],
+    ['authorizedSigners', getArrayEncoder(getAddressEncoder())],
   ]);
 }
 
 export function getCredentialDecoder(): Decoder<Credential> {
   return getStructDecoder([
-    ["discriminator", getU8Decoder()],
-    ["authority", getAddressDecoder()],
-    ["name", addDecoderSizePrefix(getBytesDecoder(), getU32Decoder())],
-    ["authorizedSigners", getArrayDecoder(getAddressDecoder())],
+    ['discriminator', getU8Decoder()],
+    ['authority', getAddressDecoder()],
+    ['name', addDecoderSizePrefix(getBytesDecoder(), getU32Decoder())],
+    ['authorizedSigners', getArrayDecoder(getAddressDecoder())],
   ]);
 }
 
@@ -120,5 +120,5 @@ export async function fetchAllMaybeCredential(
   config?: FetchAccountsConfig,
 ): Promise<MaybeAccount<Credential>[]> {
   const maybeAccounts = await fetchEncodedAccounts(rpc, addresses, config);
-  return maybeAccounts.map((maybeAccount) => decodeCredential(maybeAccount));
+  return maybeAccounts.map(maybeAccount => decodeCredential(maybeAccount));
 }

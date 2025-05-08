@@ -10,7 +10,7 @@ import {
   getU8Encoder,
   type Address,
   type ReadonlyUint8Array,
-} from "@solana/kit";
+} from '@solana/kit';
 
 import {
   type ParsedChangeAuthorizedSignersInstruction,
@@ -22,10 +22,10 @@ import {
   type ParsedCreateCredentialInstruction,
   type ParsedCreateSchemaInstruction,
   type ParsedEmitEventInstruction,
-} from "../instructions";
+} from '../instructions';
 
 export const SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS =
-  "CScmAUHnsuS6RLeqjvfYJYE2aBVnWVaAH2ybfUhdKhuo" as Address<"CScmAUHnsuS6RLeqjvfYJYE2aBVnWVaAH2ybfUhdKhuo">;
+  'CScmAUHnsuS6RLeqjvfYJYE2aBVnWVaAH2ybfUhdKhuo' as Address<'CScmAUHnsuS6RLeqjvfYJYE2aBVnWVaAH2ybfUhdKhuo'>;
 
 export enum SolanaAttestationServiceAccount {
   Attestation,
@@ -48,7 +48,7 @@ export enum SolanaAttestationServiceInstruction {
 export function identifySolanaAttestationServiceInstruction(
   instruction: { data: ReadonlyUint8Array } | ReadonlyUint8Array,
 ): SolanaAttestationServiceInstruction {
-  const data = "data" in instruction ? instruction.data : instruction;
+  const data = 'data' in instruction ? instruction.data : instruction;
   if (containsBytes(data, getU8Encoder().encode(0), 0)) {
     return SolanaAttestationServiceInstruction.CreateCredential;
   }
@@ -77,12 +77,12 @@ export function identifySolanaAttestationServiceInstruction(
     return SolanaAttestationServiceInstruction.EmitEvent;
   }
   throw new Error(
-    "The provided instruction could not be identified as a solanaAttestationService instruction.",
+    'The provided instruction could not be identified as a solanaAttestationService instruction.',
   );
 }
 
 export type ParsedSolanaAttestationServiceInstruction<
-  TProgram extends string = "CScmAUHnsuS6RLeqjvfYJYE2aBVnWVaAH2ybfUhdKhuo",
+  TProgram extends string = 'CScmAUHnsuS6RLeqjvfYJYE2aBVnWVaAH2ybfUhdKhuo',
 > =
   | ({
       instructionType: SolanaAttestationServiceInstruction.CreateCredential;

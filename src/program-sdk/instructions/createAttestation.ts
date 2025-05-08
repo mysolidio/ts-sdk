@@ -6,9 +6,19 @@
  * @see https://github.com/codama-idl/codama
  */
 import {
+  addDecoderSizePrefix,
+  addEncoderSizePrefix,
   combineCodec,
+  getAddressDecoder,
+  getAddressEncoder,
+  getBytesDecoder,
+  getBytesEncoder,
+  getI64Decoder,
+  getI64Encoder,
   getStructDecoder,
   getStructEncoder,
+  getU32Decoder,
+  getU32Encoder,
   getU8Decoder,
   getU8Encoder,
   transformEncoder,
@@ -23,31 +33,31 @@ import {
   type IInstructionWithData,
   type ReadonlyAccount,
   type ReadonlySignerAccount,
+  type ReadonlyUint8Array,
   type TransactionSigner,
   type WritableAccount,
   type WritableSignerAccount,
-} from "@solana/kit";
+} from '@solana/kit';
 
-import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
+import { SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS } from '../programs';
+import { getAccountMetaFactory, type ResolvedAccount } from '../shared';
 
-export const CLOSE_ATTESTATION_DISCRIMINATOR = 7;
+export const CREATE_ATTESTATION_DISCRIMINATOR = 6;
 
-export function getCloseAttestationDiscriminatorBytes() {
-  return getU8Encoder().encode(CLOSE_ATTESTATION_DISCRIMINATOR);
+export function getCreateAttestationDiscriminatorBytes() {
+  return getU8Encoder().encode(CREATE_ATTESTATION_DISCRIMINATOR);
 }
 
-export type CloseAttestationInstruction<
+export type CreateAttestationInstruction<
   TProgram extends string = typeof SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS,
   TAccountPayer extends string | IAccountMeta<string> = string,
   TAccountAuthority extends string | IAccountMeta<string> = string,
   TAccountCredential extends string | IAccountMeta<string> = string,
+  TAccountSchema extends string | IAccountMeta<string> = string,
   TAccountAttestation extends string | IAccountMeta<string> = string,
-  TAccountEventAuthority extends string | IAccountMeta<string> = string,
   TAccountSystemProgram extends
     | string
-    | IAccountMeta<string> = "11111111111111111111111111111111",
-  TAccountAttestationProgram extends string | IAccountMeta<string> = string,
+    | IAccountMeta<string> = '11111111111111111111111111111111',
   TRemainingAccounts extends readonly IAccountMeta<string>[] = [],
 > = IInstruction<TProgram> &
   IInstructionWithData<Uint8Array> &
@@ -64,96 +74,112 @@ export type CloseAttestationInstruction<
       TAccountCredential extends string
         ? ReadonlyAccount<TAccountCredential>
         : TAccountCredential,
+      TAccountSchema extends string
+        ? ReadonlyAccount<TAccountSchema>
+        : TAccountSchema,
       TAccountAttestation extends string
         ? WritableAccount<TAccountAttestation>
         : TAccountAttestation,
-      TAccountEventAuthority extends string
-        ? ReadonlyAccount<TAccountEventAuthority>
-        : TAccountEventAuthority,
       TAccountSystemProgram extends string
         ? ReadonlyAccount<TAccountSystemProgram>
         : TAccountSystemProgram,
-      TAccountAttestationProgram extends string
-        ? ReadonlyAccount<TAccountAttestationProgram>
-        : TAccountAttestationProgram,
       ...TRemainingAccounts,
     ]
   >;
 
-export type CloseAttestationInstructionData = { discriminator: number };
+export type CreateAttestationInstructionData = {
+  discriminator: number;
+  nonce: Address;
+  data: ReadonlyUint8Array;
+  expiry: bigint;
+};
 
-export type CloseAttestationInstructionDataArgs = {};
+export type CreateAttestationInstructionDataArgs = {
+  nonce: Address;
+  data: ReadonlyUint8Array;
+  expiry: number | bigint;
+};
 
-export function getCloseAttestationInstructionDataEncoder(): Encoder<CloseAttestationInstructionDataArgs> {
+export function getCreateAttestationInstructionDataEncoder(): Encoder<CreateAttestationInstructionDataArgs> {
   return transformEncoder(
-    getStructEncoder([["discriminator", getU8Encoder()]]),
-    (value) => ({ ...value, discriminator: CLOSE_ATTESTATION_DISCRIMINATOR }),
+    getStructEncoder([
+      ['discriminator', getU8Encoder()],
+      ['nonce', getAddressEncoder()],
+      ['data', addEncoderSizePrefix(getBytesEncoder(), getU32Encoder())],
+      ['expiry', getI64Encoder()],
+    ]),
+    value => ({ ...value, discriminator: CREATE_ATTESTATION_DISCRIMINATOR }),
   );
 }
 
-export function getCloseAttestationInstructionDataDecoder(): Decoder<CloseAttestationInstructionData> {
-  return getStructDecoder([["discriminator", getU8Decoder()]]);
+export function getCreateAttestationInstructionDataDecoder(): Decoder<CreateAttestationInstructionData> {
+  return getStructDecoder([
+    ['discriminator', getU8Decoder()],
+    ['nonce', getAddressDecoder()],
+    ['data', addDecoderSizePrefix(getBytesDecoder(), getU32Decoder())],
+    ['expiry', getI64Decoder()],
+  ]);
 }
 
-export function getCloseAttestationInstructionDataCodec(): Codec<
-  CloseAttestationInstructionDataArgs,
-  CloseAttestationInstructionData
+export function getCreateAttestationInstructionDataCodec(): Codec<
+  CreateAttestationInstructionDataArgs,
+  CreateAttestationInstructionData
 > {
   return combineCodec(
-    getCloseAttestationInstructionDataEncoder(),
-    getCloseAttestationInstructionDataDecoder(),
+    getCreateAttestationInstructionDataEncoder(),
+    getCreateAttestationInstructionDataDecoder(),
   );
 }
 
-export type CloseAttestationInput<
+export type CreateAttestationInput<
   TAccountPayer extends string = string,
   TAccountAuthority extends string = string,
   TAccountCredential extends string = string,
+  TAccountSchema extends string = string,
   TAccountAttestation extends string = string,
-  TAccountEventAuthority extends string = string,
   TAccountSystemProgram extends string = string,
-  TAccountAttestationProgram extends string = string,
 > = {
   payer: TransactionSigner<TAccountPayer>;
   /** Authorized signer of the Schema's Credential */
   authority: TransactionSigner<TAccountAuthority>;
+  /** Credential the Schema is associated with */
   credential: Address<TAccountCredential>;
+  /** Schema the Attestation is associated with */
+  schema: Address<TAccountSchema>;
   attestation: Address<TAccountAttestation>;
-  eventAuthority: Address<TAccountEventAuthority>;
   systemProgram?: Address<TAccountSystemProgram>;
-  attestationProgram: Address<TAccountAttestationProgram>;
+  nonce: CreateAttestationInstructionDataArgs['nonce'];
+  data: CreateAttestationInstructionDataArgs['data'];
+  expiry: CreateAttestationInstructionDataArgs['expiry'];
 };
 
-export function getCloseAttestationInstruction<
+export function getCreateAttestationInstruction<
   TAccountPayer extends string,
   TAccountAuthority extends string,
   TAccountCredential extends string,
+  TAccountSchema extends string,
   TAccountAttestation extends string,
-  TAccountEventAuthority extends string,
   TAccountSystemProgram extends string,
-  TAccountAttestationProgram extends string,
   TProgramAddress extends
     Address = typeof SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS,
 >(
-  input: CloseAttestationInput<
+  input: CreateAttestationInput<
     TAccountPayer,
     TAccountAuthority,
     TAccountCredential,
+    TAccountSchema,
     TAccountAttestation,
-    TAccountEventAuthority,
-    TAccountSystemProgram,
-    TAccountAttestationProgram
+    TAccountSystemProgram
   >,
   config?: { programAddress?: TProgramAddress },
-): CloseAttestationInstruction<
+): CreateAttestationInstruction<
   TProgramAddress,
   TAccountPayer,
   TAccountAuthority,
   TAccountCredential,
+  TAccountSchema,
   TAccountAttestation,
-  TAccountEventAuthority,
-  TAccountSystemProgram,
-  TAccountAttestationProgram
+  TAccountSystemProgram
 > {
   // Program address.
   const programAddress =
@@ -164,53 +190,52 @@ export function getCloseAttestationInstruction<
     payer: { value: input.payer ?? null, isWritable: true },
     authority: { value: input.authority ?? null, isWritable: false },
     credential: { value: input.credential ?? null, isWritable: false },
+    schema: { value: input.schema ?? null, isWritable: false },
     attestation: { value: input.attestation ?? null, isWritable: true },
-    eventAuthority: { value: input.eventAuthority ?? null, isWritable: false },
     systemProgram: { value: input.systemProgram ?? null, isWritable: false },
-    attestationProgram: {
-      value: input.attestationProgram ?? null,
-      isWritable: false,
-    },
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
     ResolvedAccount
   >;
 
+  // Original args.
+  const args = { ...input };
+
   // Resolve default values.
   if (!accounts.systemProgram.value) {
     accounts.systemProgram.value =
-      "11111111111111111111111111111111" as Address<"11111111111111111111111111111111">;
+      '11111111111111111111111111111111' as Address<'11111111111111111111111111111111'>;
   }
 
-  const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
+  const getAccountMeta = getAccountMetaFactory(programAddress, 'programId');
   const instruction = {
     accounts: [
       getAccountMeta(accounts.payer),
       getAccountMeta(accounts.authority),
       getAccountMeta(accounts.credential),
+      getAccountMeta(accounts.schema),
       getAccountMeta(accounts.attestation),
-      getAccountMeta(accounts.eventAuthority),
       getAccountMeta(accounts.systemProgram),
-      getAccountMeta(accounts.attestationProgram),
     ],
     programAddress,
-    data: getCloseAttestationInstructionDataEncoder().encode({}),
-  } as CloseAttestationInstruction<
+    data: getCreateAttestationInstructionDataEncoder().encode(
+      args as CreateAttestationInstructionDataArgs,
+    ),
+  } as CreateAttestationInstruction<
     TProgramAddress,
     TAccountPayer,
     TAccountAuthority,
     TAccountCredential,
+    TAccountSchema,
     TAccountAttestation,
-    TAccountEventAuthority,
-    TAccountSystemProgram,
-    TAccountAttestationProgram
+    TAccountSystemProgram
   >;
 
   return instruction;
 }
 
-export type ParsedCloseAttestationInstruction<
+export type ParsedCreateAttestationInstruction<
   TProgram extends string = typeof SOLANA_ATTESTATION_SERVICE_PROGRAM_ADDRESS,
   TAccountMetas extends readonly IAccountMeta[] = readonly IAccountMeta[],
 > = {
@@ -219,26 +244,27 @@ export type ParsedCloseAttestationInstruction<
     payer: TAccountMetas[0];
     /** Authorized signer of the Schema's Credential */
     authority: TAccountMetas[1];
+    /** Credential the Schema is associated with */
     credential: TAccountMetas[2];
-    attestation: TAccountMetas[3];
-    eventAuthority: TAccountMetas[4];
+    /** Schema the Attestation is associated with */
+    schema: TAccountMetas[3];
+    attestation: TAccountMetas[4];
     systemProgram: TAccountMetas[5];
-    attestationProgram: TAccountMetas[6];
   };
-  data: CloseAttestationInstructionData;
+  data: CreateAttestationInstructionData;
 };
 
-export function parseCloseAttestationInstruction<
+export function parseCreateAttestationInstruction<
   TProgram extends string,
   TAccountMetas extends readonly IAccountMeta[],
 >(
   instruction: IInstruction<TProgram> &
     IInstructionWithAccounts<TAccountMetas> &
     IInstructionWithData<Uint8Array>,
-): ParsedCloseAttestationInstruction<TProgram, TAccountMetas> {
-  if (instruction.accounts.length < 7) {
+): ParsedCreateAttestationInstruction<TProgram, TAccountMetas> {
+  if (instruction.accounts.length < 6) {
     // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new Error('Not enough accounts');
   }
   let accountIndex = 0;
   const getNextAccount = () => {
@@ -252,11 +278,10 @@ export function parseCloseAttestationInstruction<
       payer: getNextAccount(),
       authority: getNextAccount(),
       credential: getNextAccount(),
+      schema: getNextAccount(),
       attestation: getNextAccount(),
-      eventAuthority: getNextAccount(),
       systemProgram: getNextAccount(),
-      attestationProgram: getNextAccount(),
     },
-    data: getCloseAttestationInstructionDataDecoder().decode(instruction.data),
+    data: getCreateAttestationInstructionDataDecoder().decode(instruction.data),
   };
 }

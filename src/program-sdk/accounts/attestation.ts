@@ -37,7 +37,7 @@ import {
   type MaybeAccount,
   type MaybeEncodedAccount,
   type ReadonlyUint8Array,
-} from "@solana/kit";
+} from '@solana/kit';
 
 export type Attestation = {
   discriminator: number;
@@ -61,25 +61,25 @@ export type AttestationArgs = {
 
 export function getAttestationEncoder(): Encoder<AttestationArgs> {
   return getStructEncoder([
-    ["discriminator", getU8Encoder()],
-    ["nonce", getAddressEncoder()],
-    ["credential", getAddressEncoder()],
-    ["schema", getAddressEncoder()],
-    ["data", addEncoderSizePrefix(getBytesEncoder(), getU32Encoder())],
-    ["signer", getAddressEncoder()],
-    ["expiry", getI64Encoder()],
+    ['discriminator', getU8Encoder()],
+    ['nonce', getAddressEncoder()],
+    ['credential', getAddressEncoder()],
+    ['schema', getAddressEncoder()],
+    ['data', addEncoderSizePrefix(getBytesEncoder(), getU32Encoder())],
+    ['signer', getAddressEncoder()],
+    ['expiry', getI64Encoder()],
   ]);
 }
 
 export function getAttestationDecoder(): Decoder<Attestation> {
   return getStructDecoder([
-    ["discriminator", getU8Decoder()],
-    ["nonce", getAddressDecoder()],
-    ["credential", getAddressDecoder()],
-    ["schema", getAddressDecoder()],
-    ["data", addDecoderSizePrefix(getBytesDecoder(), getU32Decoder())],
-    ["signer", getAddressDecoder()],
-    ["expiry", getI64Decoder()],
+    ['discriminator', getU8Decoder()],
+    ['nonce', getAddressDecoder()],
+    ['credential', getAddressDecoder()],
+    ['schema', getAddressDecoder()],
+    ['data', addDecoderSizePrefix(getBytesDecoder(), getU32Decoder())],
+    ['signer', getAddressDecoder()],
+    ['expiry', getI64Decoder()],
   ]);
 }
 
@@ -137,5 +137,5 @@ export async function fetchAllMaybeAttestation(
   config?: FetchAccountsConfig,
 ): Promise<MaybeAccount<Attestation>[]> {
   const maybeAccounts = await fetchEncodedAccounts(rpc, addresses, config);
-  return maybeAccounts.map((maybeAccount) => decodeAttestation(maybeAccount));
+  return maybeAccounts.map(maybeAccount => decodeAttestation(maybeAccount));
 }
