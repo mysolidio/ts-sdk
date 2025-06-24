@@ -1,3 +1,3 @@
-export * from './solid-program-sdk';
-export * from './solid-api-sdk';
-export * from './program-sdk';
+export * from './program';
+export * from './api-client';
+export * from './transaction';

@@ -1,0 +1,1182 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AuthParamsDto" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/CommonResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AuthResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Not Found" },
+          "500": { "description": "Internal Server Error" }
+        },
+        "summary": "Login",
+        "tags": ["Auth"]
+      }
+    },
+    "/user/me": {
+      "get": {
+        "operationId": "UserController_getCurrentUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns the current user information",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserInfoResponseDto" }
+              }
+            }
+          }
+        },
+        "summary": "Get current user information",
+        "tags": ["User"]
+      },
+      "patch": {
+        "operationId": "UserController_updateProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserProfileParamsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserInfoResponseDto" }
+              }
+            }
+          }
+        },
+        "summary": "Update user profile",
+        "tags": ["User"]
+      }
+    },
+    "/user/attestation/{walletAddress}": {
+      "get": {
+        "operationId": "UserController_getAttestationByWalletAddress",
+        "parameters": [
+          {
+            "name": "walletAddress",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the attestation address for the given wallet address",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAttestationResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get attestation address by wallet address",
+        "tags": ["User"]
+      }
+    },
+    "/user/link-wallet": {
+      "post": {
+        "operationId": "UserController_linkWallet",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LinkWalletParamsDto" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the user information",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserInfoResponseDto" }
+              }
+            }
+          }
+        },
+        "summary": "Link wallet to user",
+        "tags": ["User"]
+      }
+    },
+    "/kyc/user-verification": {
+      "get": {
+        "operationId": "KycController_getUserVerification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Get user verification successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/CommonResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/GetUserVerificationResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "500": { "description": "Internal Server Error" }
+        },
+        "summary": "Get latest user verification",
+        "tags": ["Kyc"]
+      }
+    },
+    "/kyc/user-verification-url": {
+      "post": {
+        "operationId": "KycController_getVerificationUrl",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GetVerificationUrlDto" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Get user verification URL successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/CommonResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/GetVerificationUrlResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Not Found" },
+          "500": { "description": "Internal Server Error" }
+        },
+        "summary": "Get user verification URL",
+        "tags": ["Kyc"]
+      }
+    },
+    "/kyc/complete-verification": {
+      "post": {
+        "operationId": "KycController_completeVerification",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteVerificationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kyc submitted successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/CommonResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CompleteVerificationResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "Kyc submitted",
+        "tags": ["Kyc"]
+      }
+    },
+    "/kyc/aiprise-callback": {
+      "post": {
+        "operationId": "KycController_aipriseCallback",
+        "parameters": [],
+        "responses": { "201": { "description": "" } },
+        "tags": ["Kyc"]
+      }
+    },
+    "/kyc/aiprise-event-callback": {
+      "post": {
+        "operationId": "KycController_aipriseEventCallback",
+        "parameters": [],
+        "responses": { "201": { "description": "" } },
+        "tags": ["Kyc"]
+      }
+    },
+    "/sbt/{attestation}/metadata": {
+      "get": {
+        "operationId": "SbtController_getSbtMetadata",
+        "parameters": [
+          {
+            "name": "attestation",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": { "200": { "description": "" } },
+        "tags": ["Sbt"]
+      }
+    },
+    "/wallet/credentials/public-key": {
+      "get": {
+        "operationId": "CredentialController_getPublicKey",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Public key retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicKeyResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get the issuer's public key for credential verification",
+        "tags": ["Credentials"]
+      }
+    },
+    "/wallet/credentials/issue-kyc": {
+      "post": {
+        "operationId": "CredentialController_issueKycCredential",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Credential issued successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/CommonResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CredentialResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Credential issued successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CredentialResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Issue a new credential",
+        "tags": ["Credentials"]
+      }
+    },
+    "/wallet/credentials/verify": {
+      "post": {
+        "operationId": "CredentialController_verifyCredential",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/VerifyCredentialDto" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Credential verified successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/CommonResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/VerificationResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "Verify a credential",
+        "tags": ["Credentials"]
+      }
+    },
+    "/wallet/linking-requests/{id}": {
+      "get": {
+        "operationId": "LinkingRequestController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Linking request ID",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The wallet linking request has been successfully retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/CommonResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BaseLinkingRequestResultDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not Found" },
+          "500": { "description": "Internal Server Error" }
+        },
+        "summary": "Get a wallet linking request by ID",
+        "tags": ["Linking Requests"]
+      }
+    },
+    "/wallet/linking-requests": {
+      "post": {
+        "operationId": "LinkingRequestController_draft",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftLinkingRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The wallet linking request has been successfully drafted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseLinkingRequestResultDto"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "403": { "description": "Forbidden" },
+          "409": { "description": "Conflict" },
+          "500": { "description": "Internal Server Error" }
+        },
+        "summary": "Draft a new wallet linking request. If the a drafted or finalized request is found, it will be returned instead.",
+        "tags": ["Linking Requests"]
+      }
+    },
+    "/wallet/linking-requests/{id}/finalize": {
+      "post": {
+        "operationId": "LinkingRequestController_finalize",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Linking request ID",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Finalize linking request payload (omit id in body, use path param)",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinalizeLinkingRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The wallet linking request has been successfully finalized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/CommonResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BaseLinkingRequestResultDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "404": { "description": "Not Found" },
+          "409": { "description": "Conflict" },
+          "422": { "description": "Unprocessable Entity" },
+          "500": { "description": "Internal Server Error" }
+        },
+        "summary": "Finalize a wallet linking request",
+        "tags": ["Linking Requests"]
+      }
+    },
+    "/wallet/linking-requests/{id}/approve": {
+      "post": {
+        "operationId": "LinkingRequestController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Linking request ID",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Approve linking request payload (omit id in body, use path param)",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveLinkingRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The wallet linking request has been successfully approved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/CommonResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ApproveLinkingRequestResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": { "description": "Not Found" },
+          "409": { "description": "Conflict" },
+          "422": { "description": "Unprocessable Entity" },
+          "500": { "description": "Internal Server Error" }
+        },
+        "summary": "Approve a wallet linking request",
+        "tags": ["Linking Requests"]
+      }
+    },
+    "/wallet/linking-requests/{id}/reject": {
+      "post": {
+        "operationId": "LinkingRequestController_reject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Linking request ID",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Reject linking request payload (omit id in body, use path param)",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectLinkingRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The wallet linking request has been successfully rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/CommonResponse" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BaseLinkingRequestResultDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": { "description": "Not Found" },
+          "422": { "description": "Unprocessable Entity" },
+          "500": { "description": "Internal Server Error" }
+        },
+        "summary": "Reject a wallet linking request",
+        "tags": ["Linking Requests"]
+      }
+    },
+    "/sdk/users/{walletAddress}/attestation": {
+      "get": {
+        "operationId": "SdkController_getAttestation",
+        "parameters": [
+          {
+            "name": "walletAddress",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": { "200": { "description": "" } },
+        "tags": ["Sdk"]
+      }
+    },
+    "/sdk/users/{walletAddress}/kyc_url": {
+      "get": {
+        "operationId": "SdkController_getKycUrl",
+        "parameters": [
+          {
+            "name": "walletAddress",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "redirectUri",
+            "required": true,
+            "in": "query",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": { "200": { "description": "" } },
+        "tags": ["Sdk"]
+      }
+    }
+  },
+  "info": {
+    "title": "Solid API",
+    "description": "Solid API documentation",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [
+    { "url": "http://localhost:8080", "description": "Local server" },
+    { "url": "http://localhost:8080", "description": "Development server" },
+    { "url": "http://localhost:8080", "description": "Production server" }
+  ],
+  "components": {
+    "schemas": {
+      "CommonResponse": { "type": "object", "properties": {} },
+      "UserInfoResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the user",
+            "example": "1234567890"
+          },
+          "email": {
+            "type": "object",
+            "description": "The email of the user",
+            "example": "test@example.com",
+            "nullable": true
+          },
+          "username": {
+            "type": "object",
+            "description": "The username of the user",
+            "example": "test",
+            "nullable": true
+          },
+          "bio": {
+            "type": "object",
+            "description": "The bio of the user",
+            "example": "test",
+            "nullable": true
+          },
+          "wallets": {
+            "description": "The wallets of the user",
+            "example": [{ "address": "0x1234567890abcdef", "type": "EVM" }],
+            "type": "array",
+            "items": { "type": "object" }
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the user is active",
+            "example": true
+          }
+        },
+        "required": ["id", "email", "username", "bio", "wallets", "isActive"]
+      },
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "description": "The user information",
+            "allOf": [{ "$ref": "#/components/schemas/UserInfoResponseDto" }]
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "The access token in JWT format",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          },
+          "expiresIn": {
+            "type": "number",
+            "description": "The expiration time of the access token",
+            "example": 1716239022
+          }
+        },
+        "required": ["user", "accessToken", "expiresIn"]
+      },
+      "AuthParamsDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "The message to sign",
+            "example": "Hello, world!"
+          },
+          "address": {
+            "type": "string",
+            "description": "The wallet address of the user",
+            "example": "11111111111111111111111111111111"
+          },
+          "signature": {
+            "type": "string",
+            "description": "The signature of the message"
+          },
+          "walletType": {
+            "type": "string",
+            "description": "The type of the wallet, default is SVM",
+            "enum": ["SVM", "EVM"],
+            "example": "SVM"
+          }
+        },
+        "required": ["message", "address", "signature"]
+      },
+      "UpdateUserProfileParamsDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "object",
+            "description": "The email of the user",
+            "example": "test@example.com"
+          },
+          "username": {
+            "type": "object",
+            "description": "The username of the user",
+            "example": "test"
+          },
+          "bio": {
+            "type": "object",
+            "description": "The bio of the user",
+            "example": "test"
+          }
+        }
+      },
+      "UserAttestationResponseDto": {
+        "type": "object",
+        "properties": {
+          "walletAddress": {
+            "type": "string",
+            "description": "The wallet address of the user",
+            "example": "0x1234567890abcdef"
+          },
+          "attestationAddress": {
+            "type": "object",
+            "description": "The attestation address of the user",
+            "example": "LXRS1SH8fnLKGBq8mjXZxoj5nRo4SwYCjW9B5EbGq6C",
+            "nullable": true
+          },
+          "isKyc": {
+            "type": "boolean",
+            "description": "Whether the user is successfully KYCed",
+            "example": true
+          }
+        },
+        "required": ["walletAddress", "attestationAddress", "isKyc"]
+      },
+      "LinkWalletParamsDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "The message to sign",
+            "example": "Hello, world!"
+          },
+          "address": {
+            "type": "string",
+            "description": "The public key of the user",
+            "example": "11111111111111111111111111111111"
+          },
+          "signature": {
+            "type": "string",
+            "description": "The signature of the user"
+          },
+          "walletType": {
+            "type": "string",
+            "description": "The type of the wallet",
+            "enum": ["SVM", "EVM"]
+          }
+        },
+        "required": ["message", "address", "signature", "walletType"]
+      },
+      "GetUserVerificationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The verification ID",
+            "example": "123"
+          },
+          "userId": {
+            "type": "string",
+            "description": "The user ID",
+            "example": "123"
+          },
+          "verificationSessionId": {
+            "type": "string",
+            "description": "The verification session ID",
+            "example": "123"
+          },
+          "status": {
+            "type": "string",
+            "description": "The verification status",
+            "enum": [
+              "NOT_STARTED",
+              "PENDING",
+              "RUNNING",
+              "UNDER_REVIEW",
+              "COMPLETED",
+              "FAILED"
+            ],
+            "example": "COMPLETED"
+          },
+          "result": {
+            "type": "string",
+            "description": "The verification result",
+            "enum": ["APPROVED", "DECLINED", "REVIEW", "UNKNOWN"],
+            "example": "APPROVED"
+          },
+          "sentAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "When the verification was sent",
+            "example": "2024-03-25T14:30:00.000Z"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "When the verification was created",
+            "example": "2024-03-25T14:30:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "When the verification was last updated",
+            "example": "2024-03-25T14:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "verificationSessionId",
+          "status",
+          "result",
+          "sentAt",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "GetVerificationUrlResponseDto": {
+        "type": "object",
+        "properties": {
+          "verificationUrl": {
+            "type": "string",
+            "description": "The verification URL returned by the KYC provider",
+            "example": "https://example.com"
+          }
+        },
+        "required": ["verificationUrl"]
+      },
+      "UserPersonalInfoInputDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "description": "The user first name",
+            "example": "John"
+          },
+          "middleName": {
+            "type": "string",
+            "description": "The user middle name",
+            "example": "Doe"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "The user last name",
+            "example": "Doe"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "description": "The user date of birth in YYYY-MM-DD format",
+            "example": "1990-01-01"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "The user phone number",
+            "example": "+1234567890"
+          },
+          "emailAddress": {
+            "type": "string",
+            "description": "The user email address",
+            "example": "john.doe@example.com"
+          },
+          "addressCountry": {
+            "type": "string",
+            "description": "The user address",
+            "example": "123 Main St, Anytown, USA"
+          },
+          "addressCity": {
+            "type": "string",
+            "description": "The user address city",
+            "example": "Anytown"
+          },
+          "addressState": {
+            "type": "string",
+            "description": "The user address state",
+            "example": "CA"
+          },
+          "addressZipCode": {
+            "type": "string",
+            "description": "The user address zip code",
+            "example": "12345"
+          },
+          "addressStreet1": {
+            "type": "string",
+            "description": "The user address street",
+            "example": "123 Main St"
+          },
+          "addressStreet2": {
+            "type": "string",
+            "description": "The user address street 2",
+            "example": "Apt 1"
+          }
+        }
+      },
+      "GetVerificationUrlDto": {
+        "type": "object",
+        "properties": {
+          "redirectUri": {
+            "type": "string",
+            "description": "The redirect URI",
+            "example": "https://example.com"
+          },
+          "userPersonalInfo": {
+            "description": "The user personal info",
+            "allOf": [
+              { "$ref": "#/components/schemas/UserPersonalInfoInputDto" }
+            ]
+          }
+        },
+        "required": ["redirectUri", "userPersonalInfo"]
+      },
+      "CompleteVerificationResponseDto": {
+        "type": "object",
+        "properties": {
+          "verificationSessionId": {
+            "type": "string",
+            "description": "The verification session ID",
+            "example": "123"
+          }
+        },
+        "required": ["verificationSessionId"]
+      },
+      "CompleteVerificationDto": {
+        "type": "object",
+        "properties": {
+          "verificationSessionId": {
+            "type": "string",
+            "description": "The verification session ID",
+            "example": "123"
+          }
+        },
+        "required": ["verificationSessionId"]
+      },
+      "PublicKeyResponseDto": {
+        "type": "object",
+        "properties": {
+          "publicKey": {
+            "type": "string",
+            "description": "The issuer's public key in PEM format",
+            "example": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA..."
+          },
+          "issuerDid": {
+            "type": "string",
+            "description": "The issuer's DID",
+            "example": "did:example:123"
+          }
+        },
+        "required": ["publicKey", "issuerDid"]
+      },
+      "CredentialResponseDto": {
+        "type": "object",
+        "properties": {
+          "sdJwt": {
+            "type": "string",
+            "description": "The issued SD-JWT",
+            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9..."
+          }
+        },
+        "required": ["sdJwt"]
+      },
+      "VerificationResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["VALID", "INVALID"],
+            "description": "The verification status",
+            "example": "VALID"
+          },
+          "verifiedClaims": {
+            "type": "object",
+            "description": "The verified claims",
+            "example": { "name": "John Doe", "nationality": "US" }
+          }
+        },
+        "required": ["status", "verifiedClaims"]
+      },
+      "VerifyCredentialDto": {
+        "type": "object",
+        "properties": {
+          "sdJwt": {
+            "type": "string",
+            "description": "The SD-JWT to verify",
+            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9..."
+          },
+          "disclosedClaims": {
+            "type": "object",
+            "description": "The disclosed claims to verify",
+            "example": { "name": "John Doe", "nationality": "US" }
+          }
+        },
+        "required": ["sdJwt", "disclosedClaims"]
+      },
+      "BaseWalletResultDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "userId": { "type": "string" },
+          "address": { "type": "string" },
+          "type": { "type": "string", "enum": ["SVM", "EVM"] },
+          "isMain": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": [
+          "id",
+          "userId",
+          "address",
+          "type",
+          "isMain",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "BaseLinkingRequestResultDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "walletId": { "type": "string" },
+          "wallet": { "$ref": "#/components/schemas/BaseWalletResultDto" },
+          "targetWalletAddress": { "type": "string" },
+          "targetWalletType": { "type": "string", "enum": ["SVM", "EVM"] },
+          "status": {
+            "type": "string",
+            "enum": ["DRAFT", "PENDING", "APPROVED", "DECLINED"]
+          },
+          "nonce": { "type": "number" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": [
+          "id",
+          "walletId",
+          "wallet",
+          "targetWalletAddress",
+          "targetWalletType",
+          "status",
+          "nonce",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "DraftLinkingRequestDto": {
+        "type": "object",
+        "properties": {
+          "walletAddress": { "type": "string" },
+          "walletType": { "type": "string", "enum": ["SVM", "EVM"] },
+          "targetWalletAddress": { "type": "string" },
+          "targetWalletType": { "type": "string", "enum": ["SVM", "EVM"] }
+        },
+        "required": [
+          "walletAddress",
+          "walletType",
+          "targetWalletAddress",
+          "targetWalletType"
+        ]
+      },
+      "FinalizeLinkingRequestDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "message": { "type": "string" },
+          "signature": { "type": "string" }
+        },
+        "required": ["id", "message", "signature"]
+      },
+      "ApproveLinkingRequestResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "walletId": { "type": "string" },
+          "wallet": { "$ref": "#/components/schemas/BaseWalletResultDto" },
+          "targetWalletAddress": { "type": "string" },
+          "targetWalletType": { "type": "string", "enum": ["SVM", "EVM"] },
+          "status": { "type": "string", "enum": ["APPROVED"] },
+          "nonce": { "type": "number" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "linkingTx": { "type": "string" },
+          "linkingWallet": {
+            "$ref": "#/components/schemas/BaseWalletResultDto"
+          }
+        },
+        "required": [
+          "id",
+          "walletId",
+          "wallet",
+          "targetWalletAddress",
+          "targetWalletType",
+          "status",
+          "nonce",
+          "createdAt",
+          "updatedAt",
+          "linkingTx",
+          "linkingWallet"
+        ]
+      },
+      "ApproveLinkingRequestDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "message": { "type": "string" },
+          "signature": { "type": "string" },
+          "linkingTx": { "type": "string" }
+        },
+        "required": ["id", "message", "signature", "linkingTx"]
+      },
+      "RejectLinkingRequestDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "message": { "type": "string" },
+          "signature": { "type": "string" }
+        },
+        "required": ["id", "message", "signature"]
+      }
+    }
+  }
+}

@@ -1,0 +1,217 @@
+{
+  "address": "6UZqUB1eVVzUkjrA9bCETqby9GiApBKGwgWoQZ3Qr4EY",
+  "metadata": {
+    "name": "solid_svm",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "link_wallet",
+      "discriminator": [86, 92, 31, 146, 228, 51, 209, 230],
+      "accounts": [
+        {
+          "name": "requester",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "master_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117, 115, 101, 114, 95, 97, 99, 99, 111, 117, 110, 116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "wallet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "instructions",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "wallet",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "register",
+      "discriminator": [211, 124, 67, 15, 211, 194, 178, 240],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "user_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117, 115, 101, 114, 95, 97, 99, 99, 111, 117, 110, 116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "identity",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [105, 100, 101, 110, 116, 105, 116, 121]
+              },
+              {
+                "kind": "arg",
+                "path": "username"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "username",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Identity",
+      "discriminator": [58, 132, 5, 12, 176, 164, 85, 112]
+    },
+    {
+      "name": "User",
+      "discriminator": [159, 117, 95, 227, 239, 151, 58, 236]
+    }
+  ],
+  "events": [
+    {
+      "name": "UserRegistered",
+      "discriminator": [21, 42, 216, 163, 99, 51, 200, 222]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "UsernameTooLong",
+      "msg": "The username is too long."
+    },
+    {
+      "code": 6001,
+      "name": "LinkingWalletNotMatchWithSignerKey",
+      "msg": "Linking wallet does not match with signer key"
+    },
+    {
+      "code": 6002,
+      "name": "MasterKeyDoesNotMatch",
+      "msg": "Master key does not match with wallet from signature"
+    },
+    {
+      "code": 6003,
+      "name": "MustBeSignatureVerificationInstruction",
+      "msg": "Previous instruction must be ed25519 signature verification"
+    },
+    {
+      "code": 6004,
+      "name": "WalletAlreadyLinked",
+      "msg": "This wallet is already linked to the account"
+    },
+    {
+      "code": 6005,
+      "name": "SignatureDataInvalid",
+      "msg": "Invalid signature data."
+    }
+  ],
+  "types": [
+    {
+      "name": "Identity",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "master",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "User",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "username",
+            "type": "string"
+          },
+          {
+            "name": "master",
+            "type": "pubkey"
+          },
+          {
+            "name": "linking_wallets",
+            "type": {
+              "vec": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "UserRegistered",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "username",
+            "type": "string"
+          },
+          {
+            "name": "user_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "identity",
+            "type": "pubkey"
+          }
+        ]
+      }
+    }
+  ]
+}
