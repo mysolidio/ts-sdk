@@ -31,7 +31,12 @@ const walletAddress = 'YOUR_WALLET_ADDRESS';
 // Fetch user attestation info
 const attestationInfo = await apiClient.getUserAttestationInfo(walletAddress);
 console.log('Attestation info:', attestationInfo);
-// attestationInfo: { walletAddress: string; attestationAddress: string | null; isKycVerified: boolean; }
+// attestationInfo: {
+//   walletAddress: string;
+//   attestationAddress: string | null;
+//   kycStatus: 'NOT_STARTED' | 'PENDING' | 'RUNNING' | 'UNDER_REVIEW' | 'COMPLETED' | 'FAILED';
+//   kycResult: 'APPROVED' | 'DECLINED' | 'REVIEW' | 'UNKNOWN';
+// }
 
 // Fetch KYC URL for a wallet
 const kycUrlResponse = await apiClient.getKycUrl(
@@ -150,5 +155,6 @@ const attestationInfo = await apiClient.getUserAttestationInfo(
   userKeypair.publicKey.toBase58(),
 );
 console.log('Attestation info:', attestationInfo);
-// attestationInfo.isKycVerified will be true if KYC is complete
+// attestationInfo.kycStatus will reflect the current KYC process state
+// attestationInfo.kycResult will be 'APPROVED', 'DECLINED', 'REVIEW', or 'UNKNOWN'
 ```
