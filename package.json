@@ -1,5 +1,5 @@
 {
-  "name": "@solid/sdk",
+  "name": "@mysolid/ts-sdk",
   "version": "1.0.0",
   "description": "Solid SDK",
   "main": "dist/index.js",
