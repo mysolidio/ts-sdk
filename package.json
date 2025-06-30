@@ -1,7 +1,7 @@
 {
-  "name": "solid-sdk",
-  "version": "1.0.1",
-  "description": "",
+  "name": "@solid/sdk",
+  "version": "1.0.0",
+  "description": "Solid SDK",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -16,7 +16,7 @@
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
-    "prepare": "npm run build"
+    "prepare": "pnpm run build"
   },
   "author": "solid.io",
   "keywords": [

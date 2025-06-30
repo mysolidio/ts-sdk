@@ -13,9 +13,9 @@ This SDK provides tools to interact with the **Solid** attestation management se
 ## Installation
 
 ```bash
-npm install solid-sdk
+npm install @solid/sdk
 # or
-yarn add solid-sdk
+yarn add @solid/sdk
 ```
 
 ## Usage
@@ -23,7 +23,7 @@ yarn add solid-sdk
 ### 1. Using the API Client (REST Backend)
 
 ```ts
-import { SolidApiClient } from 'solid-sdk';
+import { SolidApiClient } from '@solid/sdk';
 
 const apiClient = new SolidApiClient(); // Uses default endpoint https://api.mysolid.io
 const walletAddress = 'YOUR_WALLET_ADDRESS';
@@ -49,7 +49,7 @@ console.log('KYC URL:', kycUrlResponse.url);
 ### 2. Using the Solana Program SDK
 
 ```ts
-import { SolidProgram } from 'solid-sdk';
+import { SolidProgram } from '@solid/sdk';
 import { Connection, PublicKey } from '@solana/web3.js';
 
 const connection = new Connection('https://api.mainnet-beta.solana.com');
@@ -82,7 +82,7 @@ console.log('User account:', userAccount);
 ### 3. Utility Functions for Transactions
 
 ```ts
-import { sendEncodedTx, encodeTx, updateBlockhash } from 'solid-sdk';
+import { sendEncodedTx, encodeTx, updateBlockhash } from '@solid/sdk';
 import { Connection, Transaction } from '@solana/web3.js';
 
 // Example: Send a transaction
@@ -113,7 +113,7 @@ This section describes the recommended flow for an external client to register a
 3. **Check KYC result** by calling `getUserAttestationInfo` from the API client SDK after KYC is finished.
 
 ```ts
-import { SolidProgram, SolidApiClient } from 'solid-sdk';
+import { SolidProgram, SolidApiClient } from '@solid/sdk';
 import {
   Connection,
   PublicKey,
