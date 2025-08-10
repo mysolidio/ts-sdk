@@ -1,14 +1,15 @@
 # Solid TypeScript SDK
 
-This SDK provides tools to interact with the **Solid** attestation management service on the Solana blockchain, as well as the Solid backend API. It enables developers to fetch and decode attestations, manage user accounts, and interact with the Solid program and backend from TypeScript/JavaScript applications.
+This SDK provides tools to interact with the **Solid** attestation management service on the Solana blockchain, as well as the Solid backend API. It enables developers to fetch and decode attestations, manage user accounts, interact with the Solid program, and manage client credentials from TypeScript/JavaScript applications.
 
 ## Features
 
-- Fetch and decode attestation and schema accounts from Solana
-- Find Program Derived Addresses (PDAs) for user accounts and identities
-- Register users and link wallets on the Solid program
-- Fetch attestation and KYC status from the Solid backend API
-- Utility functions for sending and encoding Solana transactions
+- **Attestation Management**: Fetch and decode attestation and schema accounts from Solana
+- **User Management**: Register users and link wallets on the Solid program  
+- **KYC Integration**: Initiate KYC processes and track status from the Solid backend API
+- **Client Management**: Authenticate with client credentials and manage client information
+- **Solana Integration**: Find Program Derived Addresses (PDAs) for user accounts and identities
+- **Transaction Utilities**: Helper functions for sending and encoding Solana transactions
 
 ## Installation
 
@@ -20,15 +21,16 @@ yarn add @mysolid/ts-sdk
 
 ## Usage
 
-### 1. Using the API Client (REST Backend)
+### 1. Using the API Client for Public Endpoints
 
 ```ts
 import { SolidApiClient } from '@mysolid/ts-sdk';
 
+// Create client without credentials for public endpoints
 const apiClient = new SolidApiClient(); // Uses default endpoint https://api.mysolid.io
 const walletAddress = 'YOUR_WALLET_ADDRESS';
 
-// Fetch user attestation info
+// Fetch user attestation info (public endpoint)
 const attestationInfo = await apiClient.getUserAttestationInfo(walletAddress);
 console.log('Attestation info:', attestationInfo);
 // attestationInfo: {
@@ -38,22 +40,90 @@ console.log('Attestation info:', attestationInfo);
 //   kycResult: 'APPROVED' | 'DECLINED' | 'REVIEW' | 'UNKNOWN';
 // }
 
-// Fetch KYC URL for a wallet
+// Fetch KYC URL (works without credentials but no client tracking)
 const kycUrlResponse = await apiClient.getKycUrl(
   walletAddress,
   'https://yourapp.com/redirect',
 );
 console.log('KYC URL:', kycUrlResponse.url);
+
+// Get available categories (public endpoint, no authentication required)
+const categories = await apiClient.getCategories();
+console.log('Available categories:', categories);
+// categories: [
+//   { id: "cat_123", name: "DeFi", slug: "defi" },
+//   { id: "cat_456", name: "Gaming", slug: "gaming" },
+//   ...
+// ]
 ```
 
-### 2. Using the Solana Program SDK
+### 2. Using the API Client with Authentication (Client Management)
+
+```ts
+import { SolidApiClient } from '@mysolid/ts-sdk';
+
+// Create authenticated client with credentials
+const authenticatedClient = new SolidApiClient('https://api.mysolid.io', {
+  apiKey: 'ak_your_api_key_here',
+  appSecret: 'as_your_app_secret_here'
+});
+
+// Fetch your client information
+const clientInfo = await authenticatedClient.getClientInfo();
+console.log('Client info:', clientInfo);
+// clientInfo: {
+//   id: string;
+//   name: string;
+//   url: string | null;
+//   logo: string | null;
+//   apiKey: string;
+//   isActive: boolean;
+//   category: { id: string; name: string; slug: string };
+//   clientSchemas?: Array<{ ... }>;
+// }
+
+// Get available categories (public endpoint, no authentication required)
+const categories = await authenticatedClient.getCategories();
+console.log('Available categories:', categories);
+// categories: [
+//   { id: "cat_123", name: "DeFi", slug: "defi" },
+//   { id: "cat_456", name: "Gaming", slug: "gaming" },
+//   ...
+// ]
+
+// Update your client information
+const updatedInfo = await authenticatedClient.updateClientInfo({
+  name: 'My Updated App Name',
+  url: 'https://myapp.com',
+  logo: 'https://myapp.com/logo.png',
+  categoryId: 'cat_123' // Use category ID from getCategories()
+});
+
+// KYC with client tracking (backend knows which client initiated)
+const trackedKyc = await authenticatedClient.getKycUrl(
+  walletAddress,
+  'https://myapp.com/kyc-callback'
+);
+console.log('Tracked KYC URL:', trackedKyc.url);
+```
+
+### 3. Getting Client Credentials
+
+To use authenticated features, you need to request client credentials from SOLID:
+
+1. **Contact SOLID Admin**: Request client credentials through official channels
+2. **Receive Credentials**: You'll receive an `apiKey` (starts with `ak_`) and `appSecret` (starts with `as_`)
+3. **Store Securely**: Keep these credentials secure and never expose them in client-side code
+4. **Use in SDK**: Initialize the SDK with your credentials as shown above
+
+### 4. Using the Solana Program SDK
 
 ```ts
 import { SolidProgram } from '@mysolid/ts-sdk';
 import { Connection, PublicKey } from '@solana/web3.js';
 
 const connection = new Connection('https://api.mainnet-beta.solana.com');
-const programId = new PublicKey('6UZqUB1eVVzUkjrA9bCETqby9GiApBKGwgWoQZ3Qr4EY');
+const programId = new PublicKey('EkBnxBMuEm3etvxmGamRKjFva2TXKZ5qhxomN1PXNJS7');
 const solidProgram = new SolidProgram(connection, programId);
 
 // Register a new user
@@ -79,7 +149,7 @@ const userAccount = await solidProgram.getUserAccount(userWallet);
 console.log('User account:', userAccount);
 ```
 
-### 3. Utility Functions for Transactions
+### 5. Utility Functions for Transactions
 
 ```ts
 import { sendEncodedTx, encodeTx, updateBlockhash } from '@mysolid/ts-sdk';
@@ -104,13 +174,35 @@ console.log('Transaction signature:', signature);
 
 MIT
 
-## Typical Flow: Register and Complete KYC
+## Typical Integration Flows
 
-This section describes the recommended flow for an external client to register a user and complete KYC using the SDK:
+### Flow 1: Basic Integration (Public Endpoints)
 
-1. **Register the user on-chain** using the program SDK (create and send the register transaction with `sendAndConfirmTransaction` from `@solana/web3.js`).
-2. **Initiate KYC** by calling `getKycUrl` from the API client SDK, then access the returned URL and complete the KYC process in the browser.
-3. **Check KYC result** by calling `getUserAttestationInfo` from the API client SDK after KYC is finished.
+For simple integrations that just need to check attestations:
+
+1. **Check attestation status** using `getUserAttestationInfo`
+2. **Initiate KYC if needed** using `getKycUrl` (without client tracking)
+3. **Verify completion** by rechecking attestation status
+
+### Flow 2: Client Integration (With Tracking)
+
+For clients who want KYC session tracking and client management:
+
+1. **Get client credentials** from SOLID admin
+2. **Initialize authenticated SDK** with credentials
+3. **Manage client info** using `getClientInfo` and `updateClientInfo`
+4. **Initiate tracked KYC** using `getKycUrl` (with client context)
+5. **Check attestation results** using `getUserAttestationInfo`
+
+### Flow 3: Full User Onboarding
+
+Complete user onboarding flow including on-chain registration:
+
+1. **Register user on-chain** using the program SDK
+2. **Initiate KYC** (with or without client tracking)
+3. **Check KYC results** and attestation status
+
+## Example: Complete Integration Flow
 
 ```ts
 import { SolidProgram, SolidApiClient } from '@mysolid/ts-sdk';
@@ -121,40 +213,63 @@ import {
   sendAndConfirmTransaction,
 } from '@solana/web3.js';
 
-// 1. Register the user on-chain
+// Initialize with client credentials (optional)
+const apiClient = new SolidApiClient('https://api.mysolid.io', {
+  apiKey: 'ak_your_api_key',
+  appSecret: 'as_your_app_secret'
+});
+
+// 1. Register user on-chain (optional)
 const connection = new Connection('https://api.mainnet-beta.solana.com');
-const programId = new PublicKey('6UZqUB1eVVzUkjrA9bCETqby9GiApBKGwgWoQZ3Qr4EY');
+const programId = new PublicKey('EkBnxBMuEm3etvxmGamRKjFva2TXKZ5qhxomN1PXNJS7');
 const solidProgram = new SolidProgram(connection, programId);
 
-const userKeypair = Keypair.generate(); // Or load from wallet
+const userKeypair = Keypair.generate();
 const username = 'your_username';
 
-// Create register transaction
 const registerTx = await solidProgram.register(userKeypair.publicKey, username);
 registerTx.feePayer = userKeypair.publicKey;
-// Optionally, set a recent blockhash if needed:
-// registerTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-registerTx.sign(userKeypair); // Sign with user's wallet
-const signature = await sendAndConfirmTransaction(connection, registerTx, [
-  userKeypair,
-]);
+registerTx.sign(userKeypair);
+const signature = await sendAndConfirmTransaction(connection, registerTx, [userKeypair]);
 console.log('Register transaction signature:', signature);
 
-// 2. Initiate KYC
-const apiClient = new SolidApiClient();
+// 2. Initiate tracked KYC (with client context)
+const walletAddress = userKeypair.publicKey.toBase58();
 const kycUrlResponse = await apiClient.getKycUrl(
-  userKeypair.publicKey.toBase58(),
-  'https://yourapp.com/redirect',
+  walletAddress,
+  'https://yourapp.com/callback'
 );
 console.log('KYC URL:', kycUrlResponse.url);
-// Redirect the user to kycUrlResponse.url in the browser and complete KYC
+// User completes KYC in browser
 
-// 3. Check KYC result
-// After the user completes KYC, you can check their attestation status:
-const attestationInfo = await apiClient.getUserAttestationInfo(
-  userKeypair.publicKey.toBase58(),
-);
+// 3. Check attestation result
+const attestationInfo = await apiClient.getUserAttestationInfo(walletAddress);
 console.log('Attestation info:', attestationInfo);
-// attestationInfo.kycStatus will reflect the current KYC process state
-// attestationInfo.kycResult will be 'APPROVED', 'DECLINED', 'REVIEW', or 'UNKNOWN'
+
+// 4. Manage client info (authenticated)
+const clientInfo = await apiClient.getClientInfo();
+console.log('Client info:', clientInfo);
+```
+
+## Breaking Changes from v1.x
+
+- **Constructor signature changed**: `SolidApiClient` now accepts optional credentials as second parameter
+- **New authentication**: Client management features require API credentials
+
+Note: The API endpoint remains `https://api.mysolid.io` (no change from v1.x)
+
+## Migration Guide
+
+```ts
+// v1.x
+const client = new SolidApiClient('https://api.mysolid.io');
+
+// v2.x (backward compatible - same endpoint)
+const client = new SolidApiClient(); // Still uses https://api.mysolid.io
+
+// v2.x (with authentication for new features)
+const client = new SolidApiClient('https://api.mysolid.io', {
+  apiKey: 'ak_...',
+  appSecret: 'as_...'
+});
 ```

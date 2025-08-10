@@ -1,7 +1,7 @@
 {
   "name": "@mysolid/ts-sdk",
-  "version": "1.0.0",
-  "description": "Solid SDK",
+  "version": "2.0.0",
+  "description": "Solid SDK - TypeScript/JavaScript SDK for interacting with SOLID attestation and client management services",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -27,7 +27,10 @@
     "kyc",
     "defi",
     "tokens",
-    "attestation"
+    "attestation",
+    "client-management",
+    "authentication",
+    "api-client"
   ],
   "license": "ISC",
   "packageManager": "pnpm@10.7.1",
